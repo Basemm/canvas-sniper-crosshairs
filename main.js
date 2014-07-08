@@ -1,59 +1,62 @@
 //TODO: allow touch
 
-var Aim = function (elementId, options) {
+var Aim = function (imgSrc, audioSrc) {
     if ( ! (this instanceof Aim) ) {
-        return new Aim(elementId, options);
+        return new Aim(imgSrc, audioSrc);
     }
 
-    this._options = options;
-    this._obj = document.getElementById(elementId);
+    var self = this,
+        img = new Image();
 
-    this._init();
+    this._img = img;
+    this._audio = new Audio(audioSrc);
+
+    img.onload = function () {
+        self._init();
+    }
+
+    img.src = imgSrc;
 }
 
 Aim.prototype._init = function () {
     var self = this,
-        canvas = self.canvas = document.createElement('canvas'),
-        ctx = self.ctx = canvas.getContext('2d'),
-        sound = this._sound = document.getElementsByTagName('audio')[0],
-        objDocOffset = self._getOffset(),
-        objWinOffset = self._obj.getBoundingClientRect();
+        canvas = self._canvas = document.createElement('canvas'),
+        ctx = self._ctx = canvas.getContext('2d'),
+        canvasDocOffset;
 
     //cache a draw function that's always bind to this object
-    this._bindDraw = this._draw.bind(this);
+    self._bindDraw = self._draw.bind(self);
 
-    //overlay canvas
-    document.body.appendChild(canvas);
-
-    canvas.style.position = 'absolute';
-    canvas.width = self._obj.width;
-    canvas.height = self._obj.height;
-    canvas.style.left = objDocOffset.left  + 'px';
-    canvas.style.top = objDocOffset.top + 'px';
-
-    canvas.style.cursor = 'none';
-
-    this._nightVisionOn = true;
+    self._nightVisionOn = true;
     self._isMoving = false;
 
-    //center sniper goggles
-    this._x = self._obj.width/2;
-    this._y = self._obj.height/2;
+    //add & adjust canvas
+    document.getElementsByTagName('div')[0].appendChild(canvas);
 
-    this._draw();
+    canvas.width = self._img.width;
+    canvas.height = self._img.height;
+    canvas.style.cursor = 'none';
+
+    canvasDocOffset = self._getCanvasDocOffset();
+
+    //center crosshairs
+    self._x = self._img.width/2;
+    self._y = self._img.height/2;
+
+    self._draw();
 
     canvas.addEventListener('mousedown', function canvasMouseDown(e) {
         //rewind sound in case of double clicks
-        sound.currentTime = 0;
-        sound.play();
+        self._audio.currentTime = 0;
+        self._audio.play();
 
         //prevent selection
         e.preventDefault();
     });
 
     canvas.addEventListener('mousemove', function canvasMouseMove(e) {
-        self._x = e.pageX - objWinOffset.left;
-        self._y = e.pageY - objWinOffset.top;
+        self._x = e.pageX - canvasDocOffset.left;
+        self._y = e.pageY - canvasDocOffset.top;
 
         if ( self._isMoving ) {
             return;
@@ -69,13 +72,12 @@ Aim.prototype._init = function () {
 }
 
 Aim.prototype._draw = function () {
-    var canvas = this.canvas,
-        ctx = this.ctx,
+    var canvas = this._canvas,
+        ctx = this._ctx,
         x = this._x,
         y = this._y;
 
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    ctx.drawImage(this._img, 0, 0);
 
     ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
 
@@ -85,11 +87,12 @@ Aim.prototype._draw = function () {
     ctx.arc(x, y, 100, 0, 2 * Math.PI);
     ctx.rect(canvas.width, 0, -canvas.width, canvas.height);
 
-    //add fog to make it more realistic
+
     if ( !this._nightVisionOn ) {
         ctx.shadowColor = '#999';
         ctx.shadowBlur = 100;
     }else{
+        //add fog to make it more realistic
         ctx.shadowColor = 'rgba(0, 253, 39, 0.5)';
         ctx.shadowBlur = 800;
     }
@@ -141,8 +144,8 @@ Aim.prototype.toggleNightVision = function () {
     this._nightVisionOn = !this._nightVisionOn;
 }
 
-Aim.prototype._getOffset = function () {
-    var el = this._obj,
+Aim.prototype._getCanvasDocOffset = function () {
+    var el = this._canvas,
         x = 0,
         y = 0;
 
@@ -156,6 +159,6 @@ Aim.prototype._getOffset = function () {
     return { left: x, top: y };
 }
 
-
 //init
-window.imgAim = Aim('img')
+window.imgAim = Aim('walk-at-night.jpg',
+                    'shot.mp3')
