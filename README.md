@@ -1,4 +1,4 @@
-[Check Demo Here](http://codepen.io/Basemm/full/FcEgd/)
+[Check Demo Here](http://basemm.github.io/canvas-sniper-crosshairs/)
 
 
 ####Night Vision
