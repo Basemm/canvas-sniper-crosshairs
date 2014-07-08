@@ -1,4 +1,4 @@
-//TODO: use video as background, allow touch, night vision, multiple guns
+//TODO: allow touch
 
 var Aim = function (elementId, options) {
     if ( ! (this instanceof Aim) ) {
