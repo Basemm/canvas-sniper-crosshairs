@@ -88,13 +88,13 @@ Aim.prototype._draw = function () {
     ctx.rect(canvas.width, 0, -canvas.width, canvas.height);
 
 
-    if ( !this._nightVisionOn ) {
-        ctx.shadowColor = '#999';
-        ctx.shadowBlur = 100;
-    }else{
-        //add fog to make it more realistic
+    if ( this._nightVisionOn ) {
         ctx.shadowColor = 'rgba(0, 253, 39, 0.5)';
         ctx.shadowBlur = 800;
+    }else{
+        //add fog to make it more realistic
+        ctx.shadowColor = '#999';
+        ctx.shadowBlur = 100;
     }
 
     ctx.shadowOffsetX = 0;
